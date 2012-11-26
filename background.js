@@ -25,33 +25,40 @@ var youtube = {
         return watchedIds;
     },
     getVideoId: function(src) {
-        var str = src.replace('https://www.youtube.com/v/', '');
-        var end = str.indexOf('?') === -1 ? 0 : str.indexOf('?');
+        var str = src.replace('https://www.youtube.com/v/', ''),
+            end = str.indexOf('?') === -1 ? 0 : str.indexOf('?');
         return str.substring(0, end);
     },
     decideWatched: function(id, callback) {
-        var url = "https://gdata.youtube.com/feeds/api/users/default/watch_history";
-        youtube.oauth.sendSignedRequest(url, function(text, xhr) {
-            var watchedIds = youtube.getWatchedIds(text, xhr);
-            console.log(watchedIds);
-            console.log(id);
-            console.log($.inArray(id, watchedIds));
-            var watched = false;
-            if ($.inArray(id, watchedIds) !== -1) {
-                watched = true;
-            }
-            callback({watched: watched});
-            //return watched;
-        }, {
-            'parameters' : {
-                'v': 2,
-                'alt': 'json',
-                'inline': true
-            },
-            'headers' : {
-                'X-GData-Key': 'key=' + youtube.settings.clientId
-            }
-        });
+        var url = "https://gdata.youtube.com/feeds/api/users/default/watch_history",
+            startIndex = 1,
+            limit = 50,
+            max = 3000;
+        whileloop();
+        function whileloop() {
+            youtube.oauth.sendSignedRequest(url, function(text, xhr) {
+                var watchedIds = youtube.getWatchedIds(text, xhr);
+                if ($.inArray(id, watchedIds) !== -1) {
+                    callback({watched: true});
+                } else if (startIndex < max) {
+                    setTimeout(whileloop, 0);
+                } else {
+                    callback({watched: false});
+                }
+            }, {
+                'parameters' : {
+                    'v': 2,
+                    'alt': 'json',
+                    'inline': true,
+                    'max-results': limit,
+                    'start-index': startIndex
+                },
+                'headers' : {
+                    'X-GData-Key': 'key=' + youtube.settings.clientId
+                }
+            });
+            startIndex += limit;
+        }
     },
     authorize: function() {
         youtube.oauth.authorize(function() {
@@ -66,6 +73,5 @@ var youtube = {
 
 chrome.extension.onMessage.addListener(function(vidId, _, sendResponse) {
     var result = youtube.decideWatched(vidId.videoId, sendResponse);
-    console.log('result: ' + result);
     return true;
 });

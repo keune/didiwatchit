@@ -16,21 +16,6 @@ function getCurrentVideoId() {
         return id;
 }
 
-/*
-var port = chrome.extension.connect();
-
-window.addEventListener("message", function(event) {
-    // We only accept messages from ourselves
-    if (event.source != window)
-      return;
-
-    if (event.data.type && (event.data.type == "FROM_PAGE")) {
-      console.log("Content script received: " + event.data.text);
-      port.postMessage(event.data.text);
-    }
-}, false);
-*/
-
 var currentVideoId = getCurrentVideoId();
 
 chrome.extension.sendMessage({videoId: currentVideoId}, function(response) {
@@ -44,11 +29,3 @@ chrome.extension.onMessage.addListener(function(msg, _, sendResponse) {
     console.log(99);
     alert("Got message from background page: " + msg);
 });
-
-/*
-if (watched) {
-    alert('Watched!');
-} else {
-    alert('Not watched');
-}
-*/
