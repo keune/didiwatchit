@@ -1,0 +1,30 @@
+{
+    "name": "Did I Watch It?",
+    "version": "1.0",
+    "manifest_version": 2,
+    "description": "Did i watch this youtube video before?",
+    "options_page": "options.html",
+    "background": {
+        "scripts": [
+            "jquery.min.js",
+            "chrome_ex_oauthsimple.js",
+            "chrome_ex_oauth.js",
+            "background.js"
+        ]
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://www.youtube.com/watch*"
+            ],
+            "js": ["jquery.min.js", "inpage.js"]
+        }
+    ],
+    "permissions": [
+        "tabs",
+        "https://gdata.youtube.com/*",
+        "https://www.google.com/accounts/OAuthGetRequestToken",
+        "https://www.google.com/accounts/OAuthAuthorizeToken",
+        "https://www.google.com/accounts/OAuthGetAccessToken"
+    ]
+}
