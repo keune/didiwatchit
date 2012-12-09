@@ -21,7 +21,9 @@ var currentVideoId = getCurrentVideoId();
 chrome.extension.sendMessage({videoId: currentVideoId}, function(response) {
     console.log(response);
     if (response.watched) {
-        $('#eow-title').html($('#eow-title').html() + '[watched]');
+        //$('#eow-title').html($('#eow-title').html() + '[watched]');
+        var html = '<span title="You last watched this video on '+ response.lastWatchedTime +'">[watched]</span>';
+        $('#watch-headline-title').html($('#watch-headline-title').html() + html);
     }
 });
 
