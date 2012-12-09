@@ -13,12 +13,18 @@ var youtube = {
     }),
     getWatchedIds: function(text, xhr) {
         var watchedIds = [];
-        var data = JSON.parse(text);
+        try {
+            var data = JSON.parse(text);
+        } catch(err) {
+            console.log('Json patladı: ' + text);
+        }
+        //console.log(data);
         if (data && data['feed'] && data['feed']['entry']) {
             var entries = data['feed']['entry'];
             for (var i=0; i<entries.length; i++) {
                 if (entries[i].content) {
-                    watchedIds.push(youtube.getVideoId(entries[i].content.src));
+                    var time = new Date(entries[i].published.$t).getTime();
+                    watchedIds.push({id: youtube.getVideoId(entries[i].content.src), time: time});
                 }
             }
         }
@@ -33,13 +39,24 @@ var youtube = {
         var url = "https://gdata.youtube.com/feeds/api/users/default/watch_history",
             startIndex = 1,
             limit = 50,
-            max = 3000;
+            max = 1000;
         whileloop();
         function whileloop() {
             youtube.oauth.sendSignedRequest(url, function(text, xhr) {
-                var watchedIds = youtube.getWatchedIds(text, xhr);
-                if ($.inArray(id, watchedIds) !== -1) {
-                    callback({watched: true});
+                var watchedIds = youtube.getWatchedIds(text, xhr),
+                    found = false,
+                    lastWatchedTime = 0;
+                for (var i=0; i<watchedIds.length; i++) {
+                    var now = new Date().getTime();
+                    if (now - watchedIds[i].time > 3000 && id == watchedIds[i].id) {
+                        found = true;
+                        if (!lastWatchedTime) {
+                            lastWatchedTime = watchedIds[i].time;
+                        }
+                    }
+                }
+                if (found) {
+                    callback({watched: true, lastWatchedTime: utils.getReadableTime(lastWatchedTime)});
                 } else if (startIndex < max) {
                     setTimeout(whileloop, 0);
                 } else {
@@ -70,6 +87,17 @@ var youtube = {
         alert('You have logged out');
     }
 };
+
+var utils = {
+    getReadableTime: function(time) {
+        var t = new Date(time);
+        return t.getMonth() + '.' + utils.getTwoDigitNumber(t.getDate()) + '.' + t.getFullYear() + ' ' + t.getHours() + ':' + t.getMinutes();
+    },
+    getTwoDigitNumber: function(num) {
+        if (num > 10) return num;
+        return '0' + num;
+    }
+}
 
 chrome.extension.onMessage.addListener(function(vidId, _, sendResponse) {
     var result = youtube.decideWatched(vidId.videoId, sendResponse);
