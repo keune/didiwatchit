@@ -94,7 +94,7 @@ var utils = {
         return t.getMonth() + '.' + utils.getTwoDigitNumber(t.getDate()) + '.' + t.getFullYear() + ' ' + t.getHours() + ':' + t.getMinutes();
     },
     getTwoDigitNumber: function(num) {
-        if (num > 10) return num;
+        if (num > 9) return num;
         return '0' + num;
     }
 }
