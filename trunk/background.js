@@ -91,7 +91,7 @@ var youtube = {
 var utils = {
     getReadableTime: function(time) {
         var t = new Date(time);
-        return t.getMonth() + '.' + utils.getTwoDigitNumber(t.getDate()) + '.' + t.getFullYear() + ' ' + t.getHours() + ':' + t.getMinutes();
+        return t.getMonth() + '.' + utils.getTwoDigitNumber(t.getDate()) + '.' + t.getFullYear() + ' ' + utils.getTwoDigitNumber(t.getHours()) + ':' + utils.getTwoDigitNumber(t.getMinutes());
     },
     getTwoDigitNumber: function(num) {
         if (num > 9) return num;
